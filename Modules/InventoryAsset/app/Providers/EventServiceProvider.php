@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\InventoryAsset\Providers;
+namespace Modules\InventoryAsset\app\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 

@@ -4,11 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('lokasi', function (Blueprint $table) {
@@ -16,14 +12,11 @@ return new class extends Migration
             $table->string('kode_lokasi');
             $table->string('nama_lokasi');
             $table->enum('tipe_lokasi', ['gudang', 'rak', 'toko', 'cabang', 'etalase']);
-            $table->text('keterangan');
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('lokasi');

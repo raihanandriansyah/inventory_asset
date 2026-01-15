@@ -1,69 +1,84 @@
 <?php
 
-namespace Modules\InventoryAsset\Http\Controllers;
+namespace Modules\InventoryAsset\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\InventoryAsset\app\Models\Lokasi;
 
 class LokasiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $lokasi = $request->input('cari');
+        $lokasi = Lokasi::latest()->get();
 
-        $nean = Lokasi::query();
-
-        if ($lokasi) {
-            $nean->where(function ($query) use ($lokasi) {
-                $query->where('kode_lokasi', 'like', '%' . $lokasi . '%')
-                    ->orWhere('nama_lokasi', 'like', '%' . $lokasi . '%');
-            });
-            
-        }
-        $nean = $nean->latest()->paginate(10);
-
-        return view('inventoryasset::lokasi.index', compact('nean', 'lokasi'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('inventoryasset::create');
+        return view('inventoryasset::lokasi.index', compact('lokasi'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function store(Request $request)
     {
-        return view('inventoryasset::show');
-    }
+        $request->validate([
+            'kode_lokasi' => 'required|string|unique:lokasi,kode_lokasi',
+            'nama_lokasi' => 'required|string|unique:lokasi,nama_lokasi',
+            'tipe_lokasi' => 'required|in:gudang,rak,toko,cabang,etalase',
+            'keterangan'  => 'nullable|string',
+        ], [
+            'kode_lokasi.unique' => 'Kode lokasi sudah terdaftar',
+            'nama_lokasi.unique' => 'Nama lokasi sudah terdaftar',
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('inventoryasset::edit');
+        Lokasi::create([
+            'kode_lokasi' => $request->kode_lokasi,
+            'nama_lokasi' => $request->nama_lokasi,
+            'tipe_lokasi' => $request->tipe_lokasi,
+            'keterangan'  => $request->keterangan,
+        ]);
+
+        return redirect()
+            ->route('lokasi.index')
+            ->with('success', 'Data lokasi berhasil ditambahkan');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id) {}
+    public function update(Request $request, $id)
+    {
+        $lokasi = Lokasi::findOrFail($id);
+
+        $request->validate([
+            'kode_lokasi' => 'required|string|unique:lokasi,kode_lokasi,' . $lokasi->id,
+            'nama_lokasi' => 'required|string|unique:lokasi,nama_lokasi,' . $lokasi->id,
+            'tipe_lokasi' => 'required|in:gudang,rak,toko,cabang,etalase',
+            'keterangan'  => 'nullable|string',
+        ], [
+            'kode_lokasi.unique' => 'Kode lokasi sudah terdaftar',
+            'nama_lokasi.unique' => 'Nama lokasi sudah terdaftar',
+        ]);
+
+        $lokasi->update($request->all());
+
+        return redirect()
+            ->route('lokasi.index')
+            ->with('success', 'Data lokasi berhasil diperbarui');
+    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id) {}
+    public function destroy($id)
+    {
+        $lokasi = Lokasi::findOrFail($id);
+        $lokasi->delete();
+
+        return redirect()
+            ->route('lokasi.index')
+            ->with('success', 'Data lokasi berhasil dihapus');
+    }
 }
